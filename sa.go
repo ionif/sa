@@ -14,14 +14,16 @@ type House struct {
 
 type Salesman struct {
 	x, y int
+	houses []*House var
 }
 
-var houses []*House
 var housenum = flag.Int("h", 10, "number of houses")
 var salesmennum = flag.Int("s", 1, "number of salesmen")
 var temp = flag.Float64("t", 10, "initial temperature")
 var coolingRate = flag.Float64("c", 0.01, "cooling rate")
- 
+var initd = 0
+var currentdist = 0
+
 func NewHouse() *House {
 	h := new(House)
 	h.x = rand.Intn(Gridsize)
@@ -38,9 +40,9 @@ func setupHouses() {
 	}
 }
 
-func (h *House) distanceto(h1 *House) float64 {
-	xdist := math.Abs(float64(h.x - h1.x))
-	ydist := math.Abs(float64(h.y - h1.y))
+func (s *Salesman) distanceto(h *House) float64 {
+	xdist := math.Abs(float64(s.x - h.x))
+	ydist := math.Abs(float64(s.y - h.y))
 	dist := math.Sqrt((xdist*xdist) + (ydist*ydist))
 
 	return dist
@@ -50,6 +52,7 @@ func NewSalesman() *Salesman {
 	s := new(Salesman)
 	r := rand.Intn(len(houses))
 	h := houses[r]
+	s.h = append(houses[:r])
 	s.x = h.x
 	s.y = h.y
 
@@ -64,14 +67,32 @@ func acceptanceProbability(newdist, currentdist, temp float64) {
 	}
 }
 
-func SA() {
-	for i := 0; i <= temp; i++ {
-		
+func Route() *Salesman {
+	for i:=1; i < len(s.h) {
+		r := rand.Intn(len(s.h))
+		dist := s.distanceto(s.h[r])
+		initd += dist
+		s.x = s.h[r].x
+		s.y = s.h[r].y
+		s.h = append(houses[:r])
 	}
+	return initd
+}
+
+func SA() {
+	currentdist = Route()
+	for i := 1; i <= temp; temp*(1-coolingRate) {
+		d := Route()
+		if acceptanceProbability(d, currentdist, temp) > rand.Float64 {
+			currentdist = d
+		}
+	}
+	fmt.Printf(currentdist)
 }
 
 func main() {
 	flag.Parse()
 	setupHouses()
-	
+	SA()
+
 }
